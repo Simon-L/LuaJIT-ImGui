@@ -33,13 +33,13 @@ set(IMGUI_SOURCES ./cimgui/cimgui.cpp
 )
 
 if (EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/cimgui/imgui/imgui_tables.cpp)
-	list(APPEND IMGUI_SOURCES ./cimgui/imgui/imgui_tables.cpp)
+    list(APPEND IMGUI_SOURCES ./cimgui/imgui/imgui_tables.cpp)
 endif()
 
 if (EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/cimgui/imgui/backends)
-	set(BACKENDS_FOLDER "./cimgui/imgui/backends/")
+    set(BACKENDS_FOLDER "./cimgui/imgui/backends/")
 else()
-	set(BACKENDS_FOLDER "./cimgui/imgui/examples/")
+    set(BACKENDS_FOLDER "./cimgui/imgui/examples/")
 endif()
 
 
@@ -67,12 +67,12 @@ option(IMPL_EXTRAS "knob and curve" ON)
 
 
 if(IMGUI_FREETYPE)
-	FIND_PACKAGE(freetype REQUIRED PATHS ${FREETYPE_PATH})
-	list(APPEND IMGUI_ft_LIBRARIES freetype)
-	list(APPEND IMGUI_LIBRARIES freetype)
-	list(APPEND IMGUI_SOURCES ./cimgui/imgui/misc/freetype/imgui_freetype.cpp)
-	add_definitions("-DCIMGUI_FREETYPE=1")
-	add_definitions("-DIMGUI_ENABLE_STB_TRUETYPE=1") #have stb also
+    FIND_PACKAGE(freetype REQUIRED PATHS ${FREETYPE_PATH})
+    list(APPEND IMGUI_ft_LIBRARIES freetype)
+    list(APPEND IMGUI_LIBRARIES freetype)
+    list(APPEND IMGUI_SOURCES ./cimgui/imgui/misc/freetype/imgui_freetype.cpp)
+    add_definitions("-DCIMGUI_FREETYPE=1")
+    add_definitions("-DIMGUI_ENABLE_STB_TRUETYPE=1") #have stb also
 endif(IMGUI_FREETYPE)
 
 if(IMPL_OPENGL3)
@@ -80,20 +80,23 @@ if(IMPL_OPENGL3)
     #./cimgui/imgui/examples/libs/gl3w/GL/gl3w.c)
     #list(APPEND IMGUI_SOURCES ./extras/cimgui_extras.cpp) #Do_gl3winit not needed
     #include_directories(cimgui/imgui/examples/libs/gl3w)
-	if(WIN32)
+    if(WIN32)
         list(APPEND IMGUI_LIBRARIES opengl32)
-	else(WIN32)#Unix
+    else(WIN32)#Unix
         list(APPEND IMGUI_LIBRARIES GL)
-	endif(WIN32)
+    elseif(APPLE) # Mac OS
+        find_package(OpenGL REQUIRED)
+        # list(APPEND IMGUI_LIBRARIES GL)
+    endif(WIN32)
 endif(IMPL_OPENGL3)
 
 if(IMPL_OPENGL2)
     list(APPEND IMGUI_SOURCES ${BACKENDS_FOLDER}imgui_impl_opengl2.cpp)
     if(WIN32)
         list(APPEND IMGUI_LIBRARIES opengl32)
-	else(WIN32)#Unix
+    else(WIN32)#Unix
         list(APPEND IMGUI_LIBRARIES GL)
-	endif(WIN32)
+    endif(WIN32)
 endif(IMPL_OPENGL2)
 
 if(IMPL_EXTRAS)
@@ -110,17 +113,17 @@ endif(UNIX)
 
 if(IMPL_GLFW)
     list(APPEND IMGUI_SOURCES_glfw ${BACKENDS_FOLDER}imgui_impl_glfw.cpp)
-	if (DEFINED GLFW_PATH)
-		message(STATUS GLFW_PATH defined as ${GLFW_PATH})
+    if (DEFINED GLFW_PATH)
+    message(STATUS GLFW_PATH defined as ${GLFW_PATH})
         FIND_PACKAGE(glfw3 3.2 REQUIRED PATHS ${GLFW_PATH})
-		message( glfw include is ${GLFW_INCLUDE})
-	else (DEFINED GLFW_PATH)
-		message(STATUS GLFW_PATH not defined)
-		#include_directories(${GLFW_INCLUDE})
-	endif(DEFINED GLFW_PATH)
-	add_library(cimgui_glfw SHARED ${IMGUI_SOURCES_glfw} $<TARGET_OBJECTS:cimgui_base>)
-	target_link_libraries(cimgui_glfw PUBLIC ${IMGUI_LIBRARIES} glfw)
-	install(TARGETS cimgui_glfw
+    message( glfw include is ${GLFW_INCLUDE})
+    else (DEFINED GLFW_PATH)
+    message(STATUS GLFW_PATH not defined)
+    #include_directories(${GLFW_INCLUDE})
+    endif(DEFINED GLFW_PATH)
+    add_library(cimgui_glfw SHARED ${IMGUI_SOURCES_glfw} $<TARGET_OBJECTS:cimgui_base>)
+    target_link_libraries(cimgui_glfw PUBLIC ${IMGUI_LIBRARIES} glfw)
+    install(TARGETS cimgui_glfw
               RUNTIME DESTINATION  ${LUAJIT_BIN}
               LIBRARY DESTINATION  ${LUAJIT_BIN}
               #ARCHIVE DESTINATION lib 
@@ -129,28 +132,32 @@ endif(IMPL_GLFW)
 
 if(IMPL_SDL)
     list(APPEND IMGUI_SOURCES_sdl ${BACKENDS_FOLDER}imgui_impl_sdl2.cpp)
-	if(DEFINED SDL_PATH)
-		message(STATUS "SDL_PATH defined as " ${SDL_PATH})
-		FIND_PACKAGE(SDL2 REQUIRED PATHS ${SDL_PATH})
-		message(STATUS "sdlfound")
-		get_target_property(SDL_INCLUDE SDL2::SDL2 INTERFACE_INCLUDE_DIRECTORIES)
-		message(STATUS "sdlinclude is " ${SDL_INCLUDE} " or " ${SDL2_INCLUDE_DIRS})
-		#if not found latest SDL2 cmake config use older
-		if (("${SDL_INCLUDE}" STREQUAL "") OR ("${SDL_INCLUDE}" STREQUAL "SDL_INCLUDE-NOTFOUND"))
-			message(STATUS "sdlinclude2 is " ${SDL2_INCLUDE_DIRS})
-			include_directories(${SDL2_INCLUDE_DIRS})
-			set(IMGUI_SDL_LIBRARY ${SDL2_LIBRARIES})
-		else()#use new one SDL2 config
-			include_directories(${SDL_INCLUDE})
-			set(IMGUI_SDL_LIBRARY SDL2::SDL2)
-		endif()
-	else(DEFINED SDL_PATH) #using SDL2 submodule from anima
-		message(STATUS "SDL_PATH not defined")
-		set(IMGUI_SDL_LIBRARY SDL2)
-	endif(DEFINED SDL_PATH)
-	add_library(cimgui_sdl SHARED  ${IMGUI_SOURCES_sdl} $<TARGET_OBJECTS:cimgui_base>)
-	target_link_libraries(cimgui_sdl PUBLIC ${IMGUI_LIBRARIES} ${IMGUI_SDL_LIBRARY})
-	install(TARGETS cimgui_sdl
+    if(DEFINED SDL_PATH)
+    message(STATUS "SDL_PATH defined as " ${SDL_PATH})
+    FIND_PACKAGE(SDL2 REQUIRED PATHS ${SDL_PATH})
+    message(STATUS "sdlfound")
+    get_target_property(SDL_INCLUDE SDL2::SDL2 INTERFACE_INCLUDE_DIRECTORIES)
+    message(STATUS "sdlinclude is " ${SDL_INCLUDE} " or " ${SDL2_INCLUDE_DIRS})
+    #if not found latest SDL2 cmake config use older
+    if (("${SDL_INCLUDE}" STREQUAL "") OR ("${SDL_INCLUDE}" STREQUAL "SDL_INCLUDE-NOTFOUND"))
+    message(STATUS "sdlinclude2 is " ${SDL2_INCLUDE_DIRS})
+    include_directories(${SDL2_INCLUDE_DIRS})
+    set(IMGUI_SDL_LIBRARY ${SDL2_LIBRARIES})
+    else()#use new one SDL2 config
+    include_directories(${SDL_INCLUDE})
+    set(IMGUI_SDL_LIBRARY SDL2::SDL2)
+    endif()
+    else(DEFINED SDL_PATH) #using SDL2 submodule from anima
+    message(STATUS "SDL_PATH not defined")
+    set(IMGUI_SDL_LIBRARY SDL2)
+    endif(DEFINED SDL_PATH)
+    add_library(cimgui_sdl SHARED  ${IMGUI_SOURCES_sdl} $<TARGET_OBJECTS:cimgui_base>)
+    if(APPLE)
+        target_link_libraries(cimgui_sdl PUBLIC ${OPENGL_LIBRARIES} ${IMGUI_LIBRARIES} ${IMGUI_SDL_LIBRARY})
+    else()
+        target_link_libraries(cimgui_sdl PUBLIC ${IMGUI_LIBRARIES} ${IMGUI_SDL_LIBRARY})
+    endif()
+    install(TARGETS cimgui_sdl
               RUNTIME DESTINATION  ${LUAJIT_BIN}
               LIBRARY DESTINATION  ${LUAJIT_BIN}
               #ARCHIVE DESTINATION lib 
