@@ -84,6 +84,9 @@ if(IMPL_OPENGL3)
 #include_directories(cimgui/imgui/examples/libs/gl3w)
 if(WIN32)
 	list(APPEND IMGUI_LIBRARIES opengl32)
+elseif(APPLE) # Mac OS
+	find_package(OpenGL REQUIRED)
+	list(APPEND IMGUI_LIBRARIES ${OPENGL_LIBRARIES})
 else(WIN32)#Unix
 	list(APPEND IMGUI_LIBRARIES GL)
 endif(WIN32)
