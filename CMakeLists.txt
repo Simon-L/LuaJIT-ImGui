@@ -150,7 +150,7 @@ if(IMPL_SDL)
 			set(IMGUI_SDL_LIBRARY ${SDL2_LIBRARIES})
 		else()#use new one SDL2 config
 			include_directories(${SDL_INCLUDE})
-			set(IMGUI_SDL_LIBRARY "SDL2")
+			set(IMGUI_SDL_LIBRARY SDL2::SDL2)
 		endif()
 	else(DEFINED SDL_PATH) #using SDL2 submodule from anima
 		message(STATUS "SDL_PATH not defined")
